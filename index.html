@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vishnu Hadouken</title>
+<meta name="description" content="A passage-by-passage look at a story drafted by Claude and edited by Max Harms.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Spectral:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#030816; --bg-raised:#0b1224; --line:#1b2234; --line-strong:#2b3346;
+  --text:#eef0f4; --text-body:#dcdfe6; --muted:#9ba1ae; --faint:#666d7e;
+  --sans:"Source Sans 3", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --serif:"Spectral", Georgia, "Times New Roman", serif;
+
+  /* Tab colours */
+  --claude:#e3875f; --claude-bg:#1e1410;
+  --edits:#8fa4d8;  --edits-bg:#0e1529;
+  --max:#6cc48c;    --max-bg:#0d1c15;
+
+  /* Diff colours */
+  --del:#f29b75; --del-line:#e3875f; --del-bg:rgba(227,135,95,.11);
+  --ins:#8fe2ab; --ins-bg:rgba(108,196,140,.16);
+
+  --measure:728px;
+}
+*{box-sizing:border-box}
+html{background:var(--bg);color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--text-body);font-family:var(--serif);font-size:20px;line-height:1.65;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+a{color:var(--text);text-decoration-color:var(--faint);text-underline-offset:3px}
+a:hover{text-decoration-color:var(--text)}
+button{font:inherit;color:inherit}
+
+/* ---------- Header ---------- */
+.site-header{position:sticky;top:0;z-index:20;background:rgba(3,8,22,.92);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar{height:64px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:0 20px;max-width:1240px;margin:0 auto}
+.brand{grid-column:2;font-family:var(--sans);font-weight:700;font-size:1.5rem;letter-spacing:-.01em;color:var(--text);text-decoration:none;white-space:nowrap}
+.header-right{justify-self:end}
+.progress{display:flex;gap:var(--seg-gap,3px);height:10px;margin-bottom:-1px}
+.progress button{flex:1;border:0;padding:0;background:none;cursor:pointer;position:relative}
+.progress button::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--line);transition:height .15s,background .2s}
+.progress button:hover::after{height:6px;background:#3a4358}
+.progress button.done::after{background:#4c5670}
+.progress button.cur::after{background:var(--text)}
+
+/* ---------- Pills (Substack-style buttons) ---------- */
+.pill{display:inline-flex;align-items:center;gap:.5em;font-family:var(--sans);font-weight:600;font-size:15px;line-height:1;color:var(--text);background:transparent;border:1px solid var(--line-strong);border-radius:999px;padding:11px 18px;text-decoration:none;cursor:pointer;transition:background .15s,border-color .15s}
+.pill:hover{background:var(--bg-raised);border-color:#3b4459}
+.pill[disabled]{opacity:.3;cursor:default;background:none}
+.pill svg{width:16px;height:16px;flex:none}
+
+/* ---------- Main view ---------- */
+.view{max-width:var(--measure);margin:0 auto;padding:56px 24px 96px}
+.view.enter-r{animation:inR .34s cubic-bezier(.2,.7,.2,1)}
+.view.enter-l{animation:inL .34s cubic-bezier(.2,.7,.2,1)}
+@keyframes inR{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
+@keyframes inL{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:none}}
+
+/* ---------- Intro ---------- */
+.intro h1{font-family:var(--sans);font-weight:700;font-size:clamp(2.5rem,6vw,3.3rem);line-height:1.08;letter-spacing:-.015em;color:var(--text);margin:0 0 .3em}
+.subtitle{font-family:var(--sans);font-size:1.5rem;color:var(--muted);margin:0 0 1.2em}
+.dateline{font-family:var(--sans);font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#b9bdc8;margin:0 0 2.2em}
+.prose p{margin:0 0 1.15em}
+.legend{font-family:var(--sans);font-size:16px;line-height:1.5;border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:2em 0 0;display:grid;gap:12px;color:var(--muted)}
+.legend-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.legend-keys{border-top:1px solid var(--line);padding-top:12px;font-size:14px}
+.chip{display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:14px;padding:4px 11px;border-radius:999px;min-width:78px;color:var(--c);background:var(--cb);border:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
+.chip::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c)}
+.chip-claude{--c:var(--claude);--cb:var(--claude-bg)}
+.chip-edits{--c:var(--edits);--cb:var(--edits-bg)}
+.chip-max{--c:var(--max);--cb:var(--max-bg)}
+kbd{font-family:var(--sans);font-size:12px;font-weight:600;display:inline-block;min-width:22px;text-align:center;padding:2px 6px;margin:0 2px;border:1px solid var(--line-strong);border-bottom-width:2px;border-radius:5px;color:var(--text-body)}
+.begin{display:flex;flex-direction:column;align-items:center;gap:12px;margin:64px 0 8px;font-family:var(--sans);font-size:15px;font-weight:600;color:var(--muted)}
+.arrow-btn{width:68px;height:68px;border-radius:50%;border:1px solid var(--line-strong);background:transparent;display:grid;place-items:center;cursor:pointer;color:var(--text);transition:background .15s,border-color .15s,transform .2s;animation:bob 2.6s ease-in-out infinite}
+.arrow-btn:hover{background:var(--bg-raised);border-color:#46506a;animation-play-state:paused;transform:translateY(3px)}
+.arrow-btn svg{width:26px;height:26px}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+
+/* ---------- Section ---------- */
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;font-family:var(--sans);margin:0 0 22px}
+.sec-num{font-size:14px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.sec-num b{color:var(--text);font-weight:700}
+.sec-label{color:var(--muted);font-size:15px;text-align:right}
+
+/* Tabbed quote */
+.quote{margin:0 0 44px}
+.quote[data-tab=claude]{--acc:var(--claude);--pbg:var(--claude-bg)}
+.quote[data-tab=edits]{--acc:var(--edits);--pbg:var(--edits-bg)}
+.quote[data-tab=max]{--acc:var(--max);--pbg:var(--max-bg)}
+.tabs{display:flex;gap:4px;position:relative;z-index:1}
+.tab{--c:var(--muted);font-family:var(--sans);font-weight:600;font-size:15px;line-height:1;padding:11px 18px 12px;margin-bottom:-1px;border:1px solid transparent;border-bottom:0;border-radius:10px 10px 0 0;background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:8px;transition:color .15s,background-color .2s}
+.tab::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c);opacity:.75}
+.tab-claude{--c:var(--claude);--cb:var(--claude-bg)}
+.tab-edits{--c:var(--edits);--cb:var(--edits-bg)}
+.tab-max{--c:var(--max);--cb:var(--max-bg)}
+.tab:hover{color:var(--text)}
+.tab[aria-selected=true]{background:var(--cb);color:var(--c);border-color:color-mix(in srgb,var(--c) 45%,transparent)}
+.tab[aria-selected=true]::before{opacity:1}
+.tab:focus-visible{outline:2px solid var(--c);outline-offset:2px}
+.panels{position:relative;display:grid;background:var(--pbg);border:1px solid color-mix(in srgb,var(--acc) 45%,transparent);border-radius:0 14px 14px 14px;transition:background-color .25s,border-color .25s}
+.panel{grid-area:1/1;padding:24px 32px 30px;visibility:hidden;opacity:0;transition:opacity .18s}
+.panel.active{visibility:visible;opacity:1}
+.panel-cap{display:flex;justify-content:space-between;gap:12px;font-family:var(--sans);font-size:12.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--acc);opacity:.85;margin-bottom:14px}
+.stats{letter-spacing:.02em;text-transform:none;font-size:14px;color:var(--muted)}
+.stats .minus{color:var(--del)} .stats .plus{color:var(--ins)}
+.txt{font-size:21px;line-height:1.72;color:var(--text)}
+.txt p{margin:0 0 .95em}
+.txt p:last-child{margin-bottom:0}
+.panel-edits .txt{color:#c4c9d5}
+.txt .empty{font-family:var(--sans);font-size:16px;font-style:italic;color:var(--muted)}
+
+/* Diff marks */
+del.d{color:var(--del);text-decoration:line-through;text-decoration-color:var(--del-line);text-decoration-thickness:1.5px;background:var(--del-bg);border-radius:3px}
+ins.i{color:var(--ins);text-decoration:none;background:var(--ins-bg);border-radius:3px}
+del.d + ins.i{margin-left:3px}
+.pil{font-family:var(--sans);font-size:.8em;font-weight:600;padding:0 3px;border-radius:3px}
+del.pil{color:var(--del);background:var(--del-bg);text-decoration:line-through}
+ins.pil{color:var(--ins);background:var(--ins-bg);text-decoration:none}
+.scene{display:block;text-align:center;font-family:var(--sans);color:var(--muted);letter-spacing:.2em;margin:.2em 0}
+.scene.del{color:var(--del);text-decoration:line-through;text-decoration-color:var(--del-line)}
+.scene.ins{color:var(--ins)}
+.fmt{text-decoration:underline dotted var(--ins);text-underline-offset:4px}
+
+/* Notes */
+.notes{font-size:20px}
+.notes-label{font-family:var(--sans);font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:12px}
+.notes p,.notes ul{margin:0 0 1.1em}
+.notes blockquote{margin:0 0 1.1em;padding:0 0 0 18px;border-left:3px solid var(--line-strong);color:var(--muted)}
+.notes code{font-size:.85em;background:var(--bg-raised);padding:.1em .35em;border-radius:4px}
+
+/* Pager */
+.pager{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:52px;padding-top:24px;border-top:1px solid var(--line);font-family:var(--sans)}
+.pager .pos{color:var(--muted);font-size:15px;font-variant-numeric:tabular-nums}
+
+@media (max-width:620px){
+  body{font-size:18px}
+  .bar{grid-template-columns:auto 1fr auto;padding:0 14px}
+  .brand{font-size:1.2rem}
+  .header-right .label{display:none}
+  .header-right .pill{padding:10px 12px}
+  .view{padding:36px 18px 72px}
+  .subtitle{font-size:1.25rem}
+  .tab{padding:10px 13px 11px;font-size:14px}
+  .panel{padding:20px 20px 24px}
+  .txt{font-size:19px}
+  .notes{font-size:18px}
+  .pager .pill .label{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .view.enter-r,.view.enter-l,.arrow-btn{animation:none}
+  .panel,.panels{transition:none}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="#intro">Vishnu Hadouken</a>
+    <div class="header-right">
+      <a class="pill" href="https://raelifin.substack.com/p/the-keepers-dharma" target="_blank" rel="noopener"><span class="label">Read the story</span>
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h7v7M13 3 4 12"/></svg></a>
+    </div>
+  </div>
+  <nav class="progress" id="progress" aria-label="Story progress"></nav>
+</header>
+
+<main class="view" id="view" aria-live="polite"></main>
+
+<!-- ================================================================
+     INTRO PAGE — edit freely; this is plain HTML.
+     ================================================================ -->
+<template id="intro-tpl">
+  <article class="intro">
+    <h1>Vishnu Hadouken</h1>
+    <p class="subtitle">(Annotated fiction; <span data-count></span> passages)</p>
+    <p class="dateline">Nov 2026</p>
+    <div class="prose">
+      <p><em>[Placeholder explainer — replace with your own.]</em> I asked Claude Opus 4.7 to write a short story. It gave me <em>The Proof of Life</em>, which I then edited and published on my blog as <a href="https://raelifin.substack.com/p/the-keepers-dharma"><em>The Keeper’s Dharma</em></a>. This page walks through the story one passage at a time, so you can see what Claude wrote, what I published, and everything that changed in between.</p>
+      <p>Each passage has a quote box with three tabs. <strong>Claude</strong> shows the draft as Claude wrote it. <strong>Max</strong> shows the version I published. <strong>Edits</strong> shows the difference inline, like tracked changes. Below each box are my notes on why I made the edits I did.</p>
+      <p>Some passages are a single paragraph. Others are a stretch of dialogue, a few paragraphs I restructured together, a scene I added, or a stretch I cut entirely.</p>
+    </div>
+    <div class="legend">
+      <div class="legend-row"><span class="chip chip-claude">Claude</span> the draft Claude Opus 4.7 wrote</div>
+      <div class="legend-row"><span class="chip chip-edits">Edits</span> <span><del class="d">cut text</del> and <ins class="i">added text</ins>, shown inline</span></div>
+      <div class="legend-row"><span class="chip chip-max">Max</span> the version I published</div>
+      <div class="legend-keys">Differences in quote marks and spacing around dashes are ignored.</div>
+      <div class="legend-keys"><kbd>←</kbd><kbd>→</kbd> move between passages &nbsp;·&nbsp; <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> switch tabs</div>
+    </div>
+    <div class="begin">
+      <button class="arrow-btn" data-go="0" aria-label="Start reading">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M5 13l7 7 7-7"/></svg>
+      </button>
+      Start reading
+    </div>
+  </article>
+</template>
+
+<!-- ================================================================
+     STORY SOURCE
+     Passages are separated by a line of ===.
+     Each passage has [claude], [max] and [notes] blocks, plus an optional [label].
+     - Story text: blank line = new paragraph; *asterisks* = italics; \* = a literal asterisk;
+       a line of --- = scene break.
+     - An empty [claude] means a passage you added; an empty [max] means a passage you cut.
+     - Notes: light Markdown (*em*, **bold**, [link](url), `code`, > quote, - list).
+       Raw HTML also works.
+     The Edits tab is computed automatically, so there's nothing to write by hand.
+     ================================================================ -->
+<script type="text/plain" id="story-source">
+===
+[claude]
+By nine o'clock on Thursday morning Pemberton had already signed Sir Reginald's name six times, in six different hands. The first signature of the day was always the shakiest — a deliberate tremor in the R, consistent with a man of ninety-four signing the monthly Direct Debit Authorization over his first cup of tea. By the sixth signature, for the Charitable Trust Disbursement to the village of Palasagar in the Satpura foothills, the hand had steadied, as was right: Sir Reginald, were he alive, would have been a better man by nine than he had been at seven. Pemberton had kept extensive notes on this through the nineteen-sixties and early seventies and considered the record authoritative. His own signature, by contrast, had gone to pieces in the manner of old men's — the P a snail, the final n a fishhook — while the master's remained a forty-four-year-old's, which it had been on the night Pemberton had learned it by heart.
+[max]
+By nine o’clock on Thursday morning, Pemberton had already signed Sir Reginald’s name six times, in six different hands. The first of the day was always the shakiest—a deliberate tremor in the R, consistent with a man of eighty-five signing the monthly Direct Debit Authorization over his first cup of tea. By the sixth signature, for the Charitable Trust Disbursement to the village of Palasagar in the Satpura foothills, the hand had steadied, as was right. Sir Reginald, were he alive, would have been a better man by nine than he had been at seven. Over the long decades, Pemberton’s own signature had withered into a caricature—the P a snail, the final n a fishhook. But the master’s remained, in broad strokes, the same as the thirty-five-year-old’s had been, when Pemberton learned it by heart.
+[notes]
+
+===
+[claude]
+The ink was a difficulty. He used the same iron-gall he had always used — Diamine, from a stationer in Tonbridge who had not, in recent years, known he was still alive — and the ink, new in the bottle, was a blue so dark it looked black. By the second or third month in the house it began to rust. By six months it was frankly orange. He had topped the bottle up five times in five decades and five times the blue had gone out of it within a season, as if the house itself were converting it. He had come, over the years, to find this acceptable. Sir Reginald's later correspondence would, if closely examined, show a consistent drift toward warmer pigments over the course of any given year. This was plausible. Old men were entitled to drift.
+[max]
+The ink was a difficulty. Sourced from a stationer in Tonbridge nearly as old as Pemberton, the Diamine didn’t get as much use these days. Correspondences slowed down, or simply ended, without replacement. New in the bottle, the iron-gall was a blue so dark it looked black. But by the third month it began to rust. By nine months it was, frankly, orange. One could forgive Sir Reginald Ashworth-Blake for drifting towards warmer pigments over the course of the year. Old gentlemen were entitled to drift. But there were limits.
+[notes]
+
+===
+[claude]
+He blotted the sixth signature, capped the fountain pen, and returned it to the japanned case in which it had lived, undisturbed, since its owner's death. The pen was a Conway Stewart, with which Sir Reginald had written three unpublished novels, the best of them called *A Warm Country,* the worst *Under Crocus,* and the middle one so indifferent Pemberton had, through an act of involuntary kindness, forgotten its title. He dusted the case with the edge of his sleeve and replaced it in the left-hand drawer of the master's desk, which also contained a small stack of blue airmail letters from Palasagar, a photograph he had looked at many times, a list in Pemberton's own hand of the things he intended one day to do about them, and, beneath the list, a letter dated 1971 from a Dr. Wigram of Harley Street, underlined twice in pencil by its recipient, concerning the wall of his aorta and the wall of his father's aorta and the statistical relationship between the two.
+[max]
+Pemberton made a quick note in his planner to visit Tonbridge on Saturday, capped the fountain pen, and returned it to the japanned case where it had lived, without exception, since its owner’s death. The pen was a Conway Stewart, with which Sir Reginald had written three unpublished novels, the best of them called *A Warm Country,* the worst *Under Crocus,* and the middle one so indifferent Pemberton had, through an act of involuntary kindness, forgotten its title. He dusted the case with the edge of his sleeve and replaced it in the left-hand drawer of the master’s desk.
+
+Pemberton paused, looking down into the drawer. A photograph lay there, beside the letter of warning from nineteen-sixty-three, embossed with the letterhead of Dr. Wigram of Harley Street, and the small stack of blue airmail letters that had been read many times, but had never been answered. He reached for the picture, muttered the last few words of a prayer, and tucked it into the envelope where it belonged.
+[notes]
+
+===
+[claude]
+He was crossing the hall to bring the post to the drawing room — there was a query from the Trust regarding the Palasagar disbursement; Mr. Harbin-Smythe, the firm's nominated partner and sole active trustee these twenty years, signing in green ink, had feelings about a clinic extension — when the doorbell rang.
+[max]
+It had taken all of Wednesday to arrange the drawing room just so, in preparation for the day’s events. Pemberton was crossing the hall to fetch *The Times* for authenticity—Sir Reginald, being a man of standing, had offered occasional commentary in life, particularly on the topic of the Kentish Weald, and thus the letters continued after death, as an occasional treat for the editors—when there came the brittle clatter of the doorbell.
+[notes]
+
+===
+[claude]
+The postman had already been, so this was someone else. The bell rang a second time, and a third, with a particular precision, as if the caller had calculated the acoustic properties of the hallway and spaced his rings accordingly.
+
+Pemberton opened the door.
+[max]
+This was bad. The solicitor, Mr. Morley, had never arrived before noon. Pemberton froze, newspaper in hand, and hoped it was a delivery. The bell rang a second time, after a polite silence, to indicate it was not.
+
+Pemberton set down the paper, took a breath to steady himself, and opened the door.
+[notes]
+
+===
+[claude]
+On the step stood a gentleman of middle height, dressed in an immaculate three-piece charcoal suit, a silk tie of the deepest indigo, and polished Oxfords in which one could have inspected the state of one's collar. His complexion was the blue of the sea at evening before weather. He had four arms. Two emerged from his cuffs in the usual manner. Two others, equally well-dressed and equally well-groomed, emerged from a second set of cuffs set slightly higher along his jacket, which had clearly been tailored to accommodate them. In his upper-right hand he held a conch shell, and balanced upon the conch, in defiance of most of what Pemberton had been taught to expect of small objects on curved surfaces, a small engraved calling card. His other three hands held a spinning disc of fire that was for the moment tactfully not rotating, a silver mace, and a lotus blossom.
+[max]
+On the step stood an intense young gentleman of middle height, dark hair woven into an elaborate topknot. He wore a marigold tuxedo as though it were the most natural thing in the world, accented by a silk tie of the deepest crimson. His feet were bare. The skin of those feet was the same as that of his hands and face: blue as the open ocean. He had four arms. Two emerged from his cuffs in the usual manner. Two others, equally well-dressed, occupied a second set of sleeves, slightly higher and further back, no-doubt custom tailored. In his lower-right hand he pinched a large conch shell between thumb and forefinger. Balanced upon the conch, in defiance of most of what Pemberton had been taught to expect of small objects on curved surfaces, was an engraved calling card. In his other three hands were a golden scepter, etched with peacock feathers; a plate-sized ring of fire, slowly rotating; and the pink and white blossom of a lotus.
+[notes]
+
+===
+[claude]
+Pemberton thought, with a clarity he had not experienced since the summer of 1962, *oh fuck.*
+[max]
+Pemberton thought, with a feeling he had not experienced so intensely since the sixties, *oh fuck.*
+[notes]
+
+===
+[claude]
+Then he said, "Good morning, sir."
+
+"Good morning," the gentleman said. "I am here from the Office of the Preserver. I have been asked to conduct a review of this household's dharmic account. The matter is routine, I assure you. I have an appointment."
+[max]
+Then he said, “Good morning, sir.”
+
+“Good morning,” the gentleman said, with a voice that resonated with calm strength. “I am here from the Office of the Preserver. Late last year, I was tasked with conducting a review of this household’s dharmic account. I apologize for the delay.”
+[notes]
+
+===
+[claude]
+The gentleman lifted the calling card from the conch with a small motion of his lower-left hand and presented it. Pemberton took it, glanced at it — the lettering was in a script he did not read but somehow understood — and set it on the silver salver by the door.
+[max]
+The gentleman presented the calling card, still perched atop the conch. Pemberton glanced at it as he took it, verifying what his gut already knew: “Krishna, Senior Avatar of Vishnu, Office of the Preserver, 108 Vaikuntha Way.” The lettering was beautiful, flowing in a script he could not read but somehow still understood. He set it on the silver salver by the door.
+[notes]
+
+===
+[claude]
+"Of course, sir. Do come in."
+
+He stepped aside, and the gentleman stepped in soundlessly.
+
+"Might I take your —" Pemberton paused. "Might I take your things, sir."
+
+"That would be most kind."
+[max]
+“Of course, sir. Do come in.” He stepped aside, and the gentleman entered.
+
+“Might I take your—” Pemberton paused. “Might I take your things, sir?”
+
+“That would be most kind.”
+[notes]
+
+===
+[claude]
+Pemberton received the four attributes one by one. The conch was warm. The disc hovered an inch above his palm, declining, out of politeness, to touch him; it was producing, on close inspection, a sound somewhere between a refrigerator two rooms away and a small industrial fan seeking a frequency it could not quite find. The mace weighed a great deal more than its volume suggested. The lotus was dry and perfectly fresh; a very small black ant had established itself on the third petal and appeared to be considering its options. He arranged the four on the foyer sideboard — a heavy inlaid piece Sir Reginald had brought back from a bazaar in Mandla on the walking tour of 1961, with four small recesses in its upper surface whose purpose he had never been able to identify and which he had therefore left empty — and conch, disc, mace, and lotus each settled, as if coming home, into the recesses that had been waiting for them for sixty-three years. He led the gentleman to the library.
+[max]
+Pemberton received the four attributes one by one. The conch hummed with the echo of breath. The scepter, which was truly more of a mace, he decided, was so heavy that it required two hands to take from the deity. The flaming disk, thankfully, was polite enough to hover an inch above his palm. The lotus was dry, but perfectly fresh. He arranged the four on the foyer sideboard—a heavy inlaid piece Sir Reginald had brought back from a bazaar in Mandla on the walking tour of nineteen-fifty-six, with four recesses in its upper surface whose purpose Pemberton had previously never been able to identify and which he had therefore left empty. Conch, mace, disk, and lotus each fit perfectly, settling in turns, as if coming home, into the recesses that had been waiting for them for fifty-eight years.
+
+He led Krishna to the library.
+[notes]
+
+===
+[claude]
+The ant, as far as Pemberton could later determine, rode the lotus off the sideboard at some point during the next hour and went about the rest of its life.
+[max]
+
+[notes]
+
+===
+[claude]
+"May I offer you tea?"
+
+"Thank you. If it is no trouble."
+
+"No trouble at all, sir. I shall be but a moment."
+[max]
+“May I offer you tea?”
+
+Krishna smiled calmly. “Thank you. If it is no trouble.”
+
+“No trouble at all, sir. I shall be but a moment.”
+[notes]
+
+===
+[claude]
+In the kitchen, Pemberton put the Russell Hobbs on. The kettle was from 1979; he had meant to replace it in 1984 and had not. He set out the silver service, which was used for guests of a certain order, polished the pot with a linen cloth, measured the leaves. He chose the Darjeeling second flush. One did not, he felt, offer an Assam to a god. His hands were, he noted with professional interest, steady — steadier than they had been an hour earlier with the Direct Debit. Adrenaline was a useful thing in a man of his age. He did not know how long it would last.
+[max]
+In the kitchen, Pemberton put the kettle on. He set out the silver service, which was used for guests of a certain order, polished the pot with a linen cloth, and measured the leaves. He chose the Darjeeling second flush. One did not, he felt, offer an Assam to a god. His hands were steady. Adrenaline was a useful thing in a man of his age.
+[notes]
+
+===
+[claude]
+On top of the fridge stood a biscuit tin with a portrait of Queen Elizabeth II on the lid, from the Silver Jubilee. It contained, and had contained for forty-five years, only buttons. He glanced at it, for a luck he had never named, and carried the tray down the corridor.
+[max]
+On top of the fridge stood a biscuit tin filled with various odds and ends—mostly buttons, along with a broken pocket watch and, most vitally, the remote control for a secret machine. On its lid was a portrait of Queen Elizabeth II from the Silver Jubilee. Pemberton glanced at it, for luck, and started back.
+[notes]
+
+===
+[claude]
+He was carrying the tray down the corridor when the doorbell rang again.
+[max]
+He was carrying the tray down the corridor when the doorbell rang again.
+[notes]
+
+===
+[claude]
+---
+
+The woman on the step was in her early forties, crisp in a navy suit, a pearl stud in each ear, holding a slim leather portfolio under one arm and a government-issue identification lanyard in the opposite hand. She wore sensible shoes and was, Pemberton noted, entirely and ordinarily present in three dimensions. On the upper right corner of her portfolio, embossed in silver and small enough that one might easily have missed it, was a disc.
+[max]
+---
+
+The woman on the step was in her early forties, crisp in a navy suit, a pearl stud in each ear, holding a slim leather portfolio under one arm and a business card in the opposite hand. She wore sensible shoes and was, Pemberton was pleased to note, entirely lacking in auras, attributes, and auguries. The card, which he took with the hand he was not using to support the tea, was in English.
+[notes]
+
+===
+[claude]
+"Good morning," she said. "Felicity Chen, Sudarshana Mutual Life Assurance. I have an appointment with Sir Reginald Ashworth-Blake at half past nine, for our quinquennial Proof of Life verification. I'm a little early."
+[max]
+“Good morning,” she said. “Felicity Cheung, Hartwell & Vane Fiduciary Services. I have an appointment with Sir Reginald Ashworth-Blake, for our quinquennial Proof of Life Certificate verification. I’m a little early.”
+[notes]
+
+===
+[claude]
+Pemberton looked at the tray, from which the teapot was steaming. In the library, a god was waiting. On Ms. Chen's portfolio, a disc she had perhaps never examined caught the morning light.
+[max]
+Pemberton looked at the tray in his hands, which he could not set on the now-occupied sideboard. The teapot was steaming. In the library, a god was waiting.
+[notes]
+
+===
+[claude]
+
+[max]
+“I was expecting Mr. Morley.”
+
+She didn’t smile. “I’m afraid he retired four years ago, in twenty-ten.”
+
+He paused, searching for an excuse. After an uncomfortable moment, he turned and set her card on the salver, then said, “Of course, Ms. Cheung. Please come in.”
+
+“Thank you.” If she noticed the flaming disk or other divine attributes on the sideboard, she gave no sign.
+[notes]
+
+===
+[claude]
+"Of course, Ms. Chen. Sir Reginald is not quite ready to receive company. If you would not object to waiting — perhaps in the conservatory? — I shall attend to you directly."
+
+She consulted a wristwatch of obvious quality. "I have two hours. After which I'm required by company policy to escalate."
+
+"Two hours will be ample, I am sure."
+[max]
+“I am afraid, due to the early hour, that Sir Reginald is not quite ready to receive company. If you would not object to waiting—perhaps in the conservatory?—I shall attend to you directly.”
+
+She consulted a wristwatch of obvious quality. “I take my duties seriously with all our clients, but especially when managing estates of this size. The law demands that I confirm, with my own eyes, that the beneficiary is living and of sound mind before the trust releases another five years of funds.” She met his eyes, and her expression softened a shade. “Still, I recognize that I’m early. I will give him two hours. After that, I shall be required, by the agreed-upon procedure, to escalate.”
+
+“Two hours will be ample, I am sure.”
+[notes]
+
+===
+[claude]
+He showed her through the east corridor to the conservatory, the room in the house furthest from the library and separated from it by the entirety of the servants' passage. He settled her with a view of the rose garden and a second pot of Darjeeling — from the everyday service, a judgment he did not explain — and left her with a selection of *Country Life* magazines, the most recent from 1978. As he turned to go he saw her take a small plastic bottle from her handbag, shake a single white tablet into her palm, and swallow it dry. She caught him noticing.
+[max]
+He showed her through the east corridor to the conservatory, the room in the house furthest from the library and separated from it by the entirety of the servants’ passage. He settled her with a view of the rose garden and a second pot of Darjeeling—from the everyday service—and left her with a selection of *Country Life* magazines, the most recent from nineteen-seventy-eight. She took a small device from her bag, one of the new types of cellular phones, perhaps, and began to punch away at the plastic keyboard with both thumbs.
+[notes]
+
+===
+[claude]
+"Migraines," she said.
+
+"I am very sorry, Ms. Chen."
+
+"I get them on certain days. I haven't worked out the pattern." She smiled very briefly, in a way that suggested the pattern was the kind one did not work out by trying.
+[max]
+
+[notes]
+
+===
+[claude]
+He returned to the library.
+
+Vishnu had not moved. He stood at the window with his two upper hands clasped behind his back and his two lower hands resting on the sill, looking at the garden. Pemberton, at close range now, could smell him: sandalwood, faintly, and beneath it something cool and metallic he could not place, like the inside of a watch that had just been opened. He poured out.
+[max]
+He returned to the library.
+
+Krishna had not moved. He stood at the window, looking out at the garden, his upper hands clasped behind his back, his two lower hands resting on the sill. Pemberton approached and poured.
+[notes]
+
+===
+[claude]
+"You have a very fine lawn," Vishnu said.
+
+"Thank you, sir. We have a man who comes on Wednesdays."
+
+"The preservation of a lawn," Vishnu said, "is a small and honourable dharma."
+
+"Indeed, sir."
+[max]
+“You have a very fine lawn,” Krishna said.
+
+“Thank you, sir. We have a man who comes once a week.”
+
+“The preservation of a lawn,” said Krishna, “is a small, but honourable dharma.”
+
+“Indeed, sir.”
+[notes]
+
+===
+[claude]
+Vishnu turned. He accepted the teacup — in an upper hand, Pemberton noticed; the lower hands were evidently reserved for heavier transactions — and took a sip. Something moved across his face: a small surprised pleasure.
+
+"This is good tea."
+
+"Thank you, sir."
+[max]
+The avatar of Vishnu turned. He accepted the teacup in an upper hand, and took a sip. Something moved across his face: a small, surprised pleasure. “This is good tea.”
+
+“Thank you, sir.”
+[notes]
+
+===
+[claude]
+"The matter I have come about concerns an account that has been open fifty years to the day. A soul has been listed, throughout this period, as *preserved, pending reconciliation.* It is not the oldest such account on the Preserver's ledger, but it is among the longest unresolved, and it has come up for review. We are perpetually behind, as you can imagine. I was due last year. I waited a season further, for reasons I may come to."
+[max]
+Krishna took another sip, then a breath. “The matter I have come about concerns an account that has been open fifty years, almost to the day. A soul has been listed, throughout this period, as ‘preserved, pending reconciliation.’ It is not the oldest such account on The Preserver’s ledger, but it is among the longest unresolved, and it has come up for review. We are perpetually behind, as you can imagine. I was due last year. I waited a season further, for reasons I may come to.”
+[notes]
+
+===
+[claude]
+"I see, sir."
+
+"The account is that of Sir Reginald Ashworth-Blake."
+
+"Yes, sir."
+
+"Who is," Vishnu said, gently, "in point of fact, dead."
+
+"Yes, sir."
+
+"And who has been dead since the twenty-third of May, nineteen seventy-four."
+
+"That is correct, sir."
+
+"But whose dharmic account has, since that date, continued to accrue transactions."
+
+"Yes, sir."
+[max]
+“I’m not sure I understand, sir.”
+
+“This is the house of Sir Reginald Ashworth-Blake, is it not?”
+
+“Yes, sir.”
+
+“And you are Johnathan Pemberton.”
+
+“Yes, sir.”
+[notes]
+
+===
+[claude]
+Vishnu inclined his head. "Mr. Pemberton, I have come to reconcile, not to punish. On the ledger, most lives are a single line. Yours is a paragraph. Sir Reginald's is a page, and an unusual page. I wish to understand the account before I act. Will you assist me?"
+
+"It would be my privilege, sir."
+[max]
+Krishna inclined his head. “Mr. Pemberton, are you familiar with the distinction between dharma and karma?”
+
+“I’m sorry, sir.”
+
+“That’s quite alright. The most important thing to understand is that none of us are free from the debts incurred by our actions, big or small, we are only free in how we decide to pay them. On my ledger, most lives are a single line. But not all. I wish to understand this account before I pay my debt. Will you assist me?”
+
+Pemberton hesitated, frozen, unable to look up at those unblinking eyes—lotus petals drifting in deep waters. Instead, he looked down at the grey-brown floorboards, worn down over the years. “It would be my privilege, sir.”
+[notes]
+
+===
+[claude]
+"Thank you. Shall we begin with the prayer?"
+
+Pemberton's hand — the hand not holding the tray — tightened very slightly on the edge of the service trolley. He said, "The prayer, sir."
+[max]
+“Thank you. Shall we begin with the prayer?”
+
+Pemberton flinched. His voice, reedy. “The… prayer, sir?”
+[notes]
+
+===
+[claude]
+"The prayer you made on the night of the twenty-third of May, nineteen seventy-four, in the study, beside the body of your employer, between the hours of nine and ten in the evening. I have the hour approximately. You may correct me."
+
+"Nine forty-seven, sir."
+
+"Thank you. Proceed."
+
+Pemberton opened his mouth to proceed, and it was at this moment that the doorbell rang for a third time.
+[max]
+“The prayer you made on the night of the twenty-third of May, nineteen-sixty-four.”
+
+Pemberton opened his mouth to protest that a man his age shouldn’t be expected to remember things from fifty years prior. And it was at this moment that the doorbell rang for a third time.
+[notes]
+
+===
+[claude]
+---
+
+This time it was a young man in a navy fleece with a clipboard, from the firm that did the boiler. The van outside said THURLOW & SON'S GAS along the side in a script that had attempted elegance and failed; the apostrophe had come loose some years ago and ended up in the wrong place and had presumably decided to stay. The young man had a fresh lip piercing and a spray of acne along the side of his neck that he would, in time, learn to forget about.
+[max]
+---
+
+It was a burly man in a navy fleece with a clipboard and a ten o’clock shadow. The van by the gate said THURLOW & SON’S GAS along the side in a heavy script that was screaming about how posh it was. The apostrophe had come loose some years ago, ending up in the wrong place, and had decided to stay. The man blinked a couple times, as though he hadn’t really expected someone to answer the door.
+[notes]
+
+===
+[claude]
+"Alright Pem," he said. "Boiler's annual, innit."
+[max]
+“May I help you, sir?” offered Pemberton.
+
+“Alright,” said the man, popping a sticky-yellow card from his clipboard and handing it over. “Boiler’s annual. Says ‘ere you booked us in, dunnit. Overdue, you said.”
+[notes]
+
+===
+[claude]
+"Jamie. I fear I have entirely forgotten, and today is in no sense convenient. Could you possibly —"
+
+"No worries mate. Tomorrow?"
+
+"Tomorrow would be ideal."
+
+"Lovely. Pay the call-out yeah?"
+
+"Gladly."
+[max]
+Pemberton placed the card on the salver beside the others without glancing at it. “I’m so sorry. I fear that I have entirely forgotten, and today has turned out to be in no sense convenient. Could you possibly—”
+
+“No worries mate. Tomorrow?”
+
+“Tomorrow would be ideal.”
+
+“Lovely. Pay the call-out yeah?”
+
+Pemberton nodded. “Gladly.”
+[notes]
+
+===
+[claude]
+"Nice one." Jamie paused on the step, as if about to add something, thought better of it, and went back to his van. Pemberton watched him go and felt, briefly, that the world he actually lived in had reached up through the floorboards and tapped him once on the shoulder. He closed the door.
+[max]
+“Nice one.” The man paused on the step, as if about to add something, thought better of it, and went back to his van. Pemberton watched him go and felt, briefly, that day-to-day existence had just made a desperate attempt to reach out and shelter him from his fate for just a little longer. He closed the door.
+[notes]
+
+===
+[claude]
+He went to the conservatory to check on Ms. Chen, who had progressed halfway through the nineteen-seventy-eight *Country Life* and was making small marks in her portfolio with a silver pencil. He returned to the library. Vishnu was still at the window.
+[max]
+Krishna was still at the window.
+[notes]
+
+===
+[claude]
+"Forgive the interruption, sir. The boiler."
+
+"The preservation of a boiler," said Vishnu, "is also a small dharma. Please continue."
+[max]
+“Forgive the interruption, sir. I had forgotten that I scheduled repairs.”
+
+“The preservation of a house,” said Krishna, watching the sky, “is also a small dharma. Are you now ready—”
+[notes]
+
+===
+[claude]
+Pemberton had just begun to speak of the night in question when he heard, through the open library door, the tap of sensible shoes in the east corridor. Ms. Chen, it seemed, had elected to stretch her legs.
+
+Pemberton was already moving. "One moment, sir. One moment only."
+
+"There is always a second appointment," said Vishnu.
+[max]
+There was a sound from the east corridor, for Pemberton had, in his haste, failed to close the library door. Sensible shoes tapped a steady rhythm. Ms. Cheung, it seemed, had elected to stretch her legs.
+
+Pemberton was already moving. “Very sorry, sir. One moment, sir. One moment only.”
+
+“There is always a second appointment,” said the god.
+[notes]
+
+===
+[claude]
+---
+
+Pemberton stepped into the corridor. Ms. Chen was a few yards from the library door.
+
+"Ms. Chen. Is there something I can bring you?"
+
+"I wondered if there was a cloakroom."
+
+"Indeed there is. Through there, first on the left."
+
+"Thank you."
+
+She altered her course. Pemberton stood in the corridor until he heard the cloakroom door close, then returned to the library.
+[max]
+Pemberton stepped into the corridor. Ms. Cheung was only a few yards from the library door.
+
+“Madam, is there something I can bring you?”
+
+“I’m sorry, but I wondered if there was a cloakroom.”
+
+“Indeed there is. Through there, first on the left.”
+
+“Thank you.”
+
+She altered her course. Pemberton stood, blocking in the corridor until he heard the cloakroom door close, then turned.
+[notes]
+
+===
+[claude]
+"She is an auditor," said Vishnu.
+
+"Yes, sir."
+
+"From Sudarshana Mutual."
+
+"Yes, sir."
+
+"An interesting name for an insurance concern."
+
+"The firm is of some antiquity, sir. I believe it was founded by an East India man."
+
+"Ah," said Vishnu. The syllable was private; it contained, very briefly, a recognition. "Yes. It would have been. She is here to verify that Sir Reginald is alive."
+
+"Yes, sir."
+
+"He is not."
+
+"No, sir."
+
+"And yet you will, I take it, produce him."
+
+Pemberton inclined his head. "I have developed, over the years, certain methods, sir."
+
+"I should be very interested to see them."
+
+"I regret that is not possible at this time, sir."
+[max]
+“She is also an auditor,” said Krishna, silently having moved to the doorway.
+
+“Yes, sir.”
+
+“Here to see a dead man and say he is alive.”
+
+Pemberton was silent.
+
+“I wonder,” added the avatar of Vishnu, in a tone that reminded Pemberton of his father, “How did you relate to the fact that all this went on for so long? Skill? Cleverness? … Luck? Ms. Cheung, unlike Mr. Morley, isn’t a little blind and more than a little foolish.”
+
+Pemberton glanced towards the drawing room, thinking briefly of newspapers and lies. “I invested a great deal of time and effort, over the years, sir.” His gaze returned to meet those unblinking depths. Pemberton’s hands began to tremble.
+[notes]
+
+===
+[claude]
+Vishnu smiled: it was like a shutter opening briefly in a room that had been dim for a long while. "Mr. Pemberton, I have been in this world, on and off, for a very long time. I am familiar with your methods — though in your case the methods have done less of the work than you may believe. A house that will preserve a body will preserve a ledger entry without inconvenience. Your bank has never queried the account because the account has never seemed anomalous to it. Ms. Chen's firm has been satisfied these fifty years because her instruments have been reading the house, not the man. Your signatures have helped. The house has done the rest. I will not embarrass you by describing what has been yours and what has been the house's. But I would like you to understand that the two audits you are presently conducting — mine and Ms. Chen's — are the same audit in two registers. Ms. Chen's firm was founded by a man to whom I once did a small service; he repaid it, as one does, by opening an office. The office has been open ever since. It is not possible to satisfy one of us while deceiving the other. Not for an hour, not for five minutes. Do you understand?"
+[max]
+Krishna stepped forward, touching Pemberton on the shoulder, sturdy and warm. “Mr. Pemberton, I have been in this world, on and off, for a very long time. Your methods were as good as anyone’s, and you should be proud of that. The path is chosen, in part, according to skill. Though in your case it was less than you may believe. A body can be preserved. Suspicious minds can be diverted. Strength and luck come to those who align themselves with dharma.” The Preserver paused. His hand withdrew. “But karma comes due. You should understand that the two audits you are presently hosting—mine and Ms. Cheung’s—are the same audit in two registers. It is not possible to satisfy one of us while deceiving the other. Not for an hour, not for five minutes. Do you understand?”
+[notes]
+
+===
+[claude]
+"I believe I do, sir."
+
+"Then let us dispense with the methods. Tell me the story. All of it. From the prayer forward. And when Ms. Chen returns from the cloakroom, I should like her to come in and hear it with us. I think she has earned a hearing."
+[max]
+“I… I believe I do, sir.”
+
+“Then let us be done with this façade. When Ms. Cheung returns from the cloakroom, I should like her to accompany us to the drawing room and hear you tell the story. All of it.”
+[notes]
+
+===
+[claude]
+"Sir — with respect, sir, she will —"
+
+"She will," said Vishnu. "She is a professional. Call her in."
+[max]
+“Sir—with respect, sir, she will not believe—”
+
+“She will,” said Krishna. “She is a professional, selected for her ability to hold what is true in an open palm, without crushing it. Call her in. I shall wait with Sir Reginald.”
+[notes]
+
+===
+[claude]
+---
+
+Pemberton called her in.
+
+She stood in the doorway of the library and looked, for a moment, at the four-armed blue gentleman sitting with a teacup in an upper hand. Something moved behind her face, once and then again.
+[max]
+---
+
+The late master waved at them as Pemberton and Cheung entered the drawing room. He was seated, at ease, in an armchair by the window, bushy moustaches and thick, tinted spectacles masking his face. On his lap was the dust-and-pomegranate afghan from Suez, but no newspaper, for Pemberton had forgotten it in the entry hall during all the excitement.
+
+The puppetry was sophisticated. While the gesture had been initiated by the wire attached to the door, the weights and pulleys in the basement completed the tired motion of arm and wrist without needing the door to close. This was good, as Ms. Cheung stood frozen in the doorway, staring at the four-armed blue gentleman who sat with bare feet tucked up on the sofa in a perfect yoga pose beside Sir Reginald. It looked for all the world like they were interrupting a deep conversation.
+[notes]
+
+===
+[claude]
+"Jesus," she said, very softly. Then, louder, as the training took over: "Ah."
+
+"Ms. Chen," said Vishnu, rising. "Thank you for your patience. Please, do sit down. Mr. Pemberton is about to explain."
+[max]
+“Jesus Christ,” she whispered under her breath.
+
+Pemberton thought he caught the hint of a smirk on the god’s placid expression. “Ms. Cheung,” said Krishna, rising briefly. “Thank you for your patience. Please, do sit down. Mr. Pemberton is about to explain.”
+[notes]
+
+===
+[claude]
+She sat. She opened the portfolio. She uncapped the silver pencil. Her hand, Pemberton saw, was steady. Her morning had in the past thirty seconds changed categories, but her hand was steady: it was, he thought, a very good hand. On the corner of her portfolio the embossed disc caught the light again, and he wondered whether she had ever, in her career, had occasion to look at it.
+
+He began.
+[max]
+It was only as she sat—in the Hepplewhite by the davenport—that the full truth of Sir Reginald Ashworth-Blake revealed itself to her. She traced the fishing line woven into his jaw, noticed the painted eyehooks tucked into the upper wainscoting. Pemberton took his position by the mantle. The discreet levers hidden in its paneling were now as pointless as the one bit of modern gadgetry he had grudgingly allowed himself—a small Bluetooth speaker, sewn into the master’s collar. He’d failed to pocket the controller, anyway; it still rested on top of the fridge, beneath the gaze of Her Majesty.
+
+Ms. Cheung, cool as ice, opened her portfolio, uncapped an elegant stylograph, and directed her attention away from the corpse and the god, towards the man whom she expected to provide her some purchase on all this mess. Pemberton nodded in approval, cleared his throat, then began.
+[notes]
+
+===
+[claude]
+---
+
+He told them about the twenty-third of May, nineteen seventy-four. About Sir Reginald, who had been forty-four years old, who had come home that afternoon from a long walk in the woods, who had sat down in his study to write, who had some while into the evening put down his Conway Stewart and said, to no one in particular, "oh," in a mild voice, and who had then died of the aortic rupture Dr. Wigram had spent three years warning him about, and against which no medicine available in 1974 could have done anything whatever. His father had gone the same way in 1963. Sir Reginald had, Pemberton said, been expecting it; he had not been expecting it that evening.
+[max]
+The story began in the middle, on the twenty-third of May, nineteen-sixty-four. Sir Reginald, who had recently celebrated his thirty-fifth birthday in his own, quiet fashion, and then had gone through a much more mundane Proof of Life with Hartwell & Vane the week before—the second such indignity he’d had to endure—had come home that afternoon from a long walk in the woods, and sat down in his study to write. Then, at some moment, unseen, had said to no one in particular, “oh,” in a mild voice, and proceeded to abruptly die of the aortic rupture Dr. Wigram had spent three years warning him about, but against which no medicine available in nineteen-sixty-four could have done anything whatsoever. His father, Sir Christopher had gone the same way in nineteen-fifty-two. Sir Reginald had, Pemberton said, been expecting it; he had not been expecting it that evening.
+[notes]
+
+===
+[claude]
+He told them how he, Pemberton, had come in presently with the evening whisky and had found the master slumped forward with his cheek on the page, the Conway Stewart on the rug, the ink bottle on its side and emptying steadily into the carpet. He told them that Sir Reginald had no children, no surviving siblings, and no heir of any kind, and that the estate would have passed, on his death, to a cousin in Durban whom Sir Reginald had not spoken to in thirty years, and whom he had privately described, in a letter Pemberton had read and subsequently burned, as a ferret in human form. The cousin — Pemberton added, because he had no wish to tidy anything now — had, in December of 1998, sent Sir Reginald a Christmas card. Pemberton had been forging Sir Reginald's life for twenty-four years at that point and had become, perforce, the chief reader of his correspondence. The card had shown the cousin by an above-ground pool in Durban, a glass of wine in each hand, the caption in his own writing: *living the fucking dream.* Pemberton had filed it. He had, he was aware, filed it with a certain venom.
+[max]
+He told them how he, Pemberton, had come in presently with the evening whisky and had found the master slumped forward, his cheek on the page, the Conway Stewart on the floor, the ink bottle on its side, emptying slowly onto the rug. Sir Reginald had no children, no surviving siblings, and no heir of any kind. He did, however, have a beneficiary.
+[notes]
+
+===
+[claude]
+He told them about the annuity. Sir Reginald's father, a prudent man, had purchased it in 1938 through an obscure Lloyd's-adjacent insurer with a Sanskrit name, against the probability of war and inflation and filial indiscipline. It paid a monthly sum for the life of the beneficiary only, with a minimum guaranteed period, and it paid it very generously, because the annuities of 1938 were priced by men who did not yet know what the century would do — or, Pemberton supposed, by men who knew exactly what it would do and had different reasons than actuarial ones for pricing as they did. Here he glanced, for the first time, at Ms. Chen. Ms. Chen, to her credit, did not glance back. On the night in question the guaranteed period had sixty-nine more years to run.
+[max]
+Pemberton himself had only been away from England on two occasions, and one was to visit an aunt in Wales. Sir Reginald, however, was a man of the world. Born just too late to serve in the war, he grew up idolizing and mythologizing the older generation—they all did, you must understand—and in particular, he lamented that he had missed his chance to embark on “adventures that served King and Country.” Thus, in his wild days, he was, quite frankly, a bit of a cad. While technically at Oxford, he spent most seasons on the continent, enjoying a life of rakish wanderlust.
+
+Sir Christopher, the father, had served in the war. He had been an officer, though of what rank, Pemberton did not know. He had blood on his hands, in more ways than one. In proportion to the misadventures of his only son, he grew colder and colder still. When he died, they had not been on good terms. So while Reginald inherited the title of baronet, he did not fully inherit the property. Instead, the father set up a trust, which would pay out a modest annuity, with the intention of disbursing the fund over the span of a century, primarily, perhaps, to Sir Reginald’s children, if he’d managed to live long enough to have any.
+
+Instead, given the lack of a direct male line, Pemberton explained that the trust’s annuities, along with control of the house and everything else, would have passed, on his death, to a cousin in Durban whom Sir Reginald had later entertained only once, and who he had privately described, afterward, as a ferret in human form. The cousin—Pemberton added, because he had no wish to tidy anything now—had, in December of nineteen-ninety-nine, sent Sir Reginald a Christmas card. Pemberton, having forged Sir Reginald’s life for decades at that point, had become, perforce, the chief reader of his correspondence. The card had shown the cousin by an above-ground pool, a glass of wine in each hand, arms wrapped around two Spanish girls a third his age, with a caption in his own writing: *living the goddamn dream!*
+
+Sir Reginald, despite the warnings of his physician, had not written a will. He certainly wouldn’t have included his cousin in it. His accumulated funds were nothing, compared to the trust, but even still, it could be a meaningful amount of money, for one who had grown up in the Durham coalfield. Or in the village of Palasagar.
+[notes]
+
+===
+[claude]
+Sir Reginald's will, Pemberton said, left the bulk of the estate to the cousin. A grudging bulk, but a bulk. There was, however, a codicil, written two years before his death, in Pemberton's presence, after a conversation about a newspaper article Sir Reginald had read. The codicil specified that a monthly sum equal to the annuity should be paid to a village in the Satpura foothills called Palasagar, which Sir Reginald had visited once in 1961 on a walking tour — the same tour on which he had bought, in Mandla, a heavy inlaid sideboard whose four recesses he could not identify — and where he had been given tea by a woman whose hut had no roof. He had thought about that woman more than he had thought about most of the things he was meant to think about, he had told Pemberton at the time, and he wished to do something about her hut, and her neighbours' huts, and the school in the next valley, and the clinic the district did not have. The codicil provided for all of it. But the codicil was contingent on the annuity, and the annuity paid only while the beneficiary lived. On Sir Reginald's death the annuity would terminate; on its termination the trust would have nothing to disburse; the codicil would become a page of wishes.
+[max]
+In the wake of his father’s untimely death, Sir Reginald began to change. It was in these years that Pemberton, a young man at the time, had been hired on. Perhaps his feelings would have been different, had he known his master during the years before. Trips to Paris and Ibiza became trips to Cairo and Jerusalem. And then, in nineteen-fifty-six, he visited India. Of all the stories he loved to tell, Sir Reginald returned, evening after evening, to tales of the Festival of Colors in Mumbai, the wild tiger he saw in Madhya Pradesh, the Lakshmana Temple, and the time he spent in a tiny community, being served tea in a rainstorm by a single mother who did not know him, as she nursed her baby in a hut that had no true roof. He had thought about that woman, in the days after, more than he had thought about any of the other women he had met on his travels, he had told Pemberton on Christmas day, nineteen-sixty-three. He said he wished to do something about her hut, and her neighbours’ huts, and the school in the next valley, and the clinic the district did not have. He had been writing his solicitor—“trying to live up to the ghost of his father’s caution, I think”—to establish a new trust, on the night that he died.
+[notes]
+
+===
+[claude]
+"I did the arithmetic, sir," Pemberton said. "Standing beside him, in my head. The annuity would pay for sixty-nine more years; the codicil would direct every pound of it to Palasagar. I calculated the number of roofs, the number of children, the clinic. And I knelt, sir, beside the master, and I prayed."
+[max]
+“I understood the arithmetic, sir,” Pemberton said, arms folded. “Standing beside him, I did the maths. The annuity would pay for eighty-eight more years; and every pound of it could go to Palasagar. What funded only a modest lifestyle for a gentleman of minor rank, could pay for many roofs, a school, and the only clinic within a day’s walk. He had sold me. Without realizing it, in those evenings, listening to him ramble, I came to love a place I had never been, and a people I had never met. And so I knelt, sir, beside the master, and I prayed.”
+[notes]
+
+===
+[claude]
+He paused. He had reached the hinge of the story. He took up his own teacup, which he had poured for himself and had not yet touched, and drank.
+[max]
+Pemberton paused, feelings threatening his composure. He had been speaking to Krishna, but his eyes rested upon the leathered face of his master. He moved, feeling the weight of his bones, to the tray which he had brought in with Ms. Cheung, in case either of their guests needed refreshment. Neither of them had. But Pemberton took the time to pour his own cup, and drank. He set it down, and returned to his place by the mantle.
+[notes]
+
+===
+[claude]
+"Sir, the words I have given the Trust, and the words I have given myself, these fifty years, are not the words I actually said. The words I have given are: *please preserve Sir Reginald just long enough for the village, and then come and take me in his place.* A decent prayer. A creditable prayer. That is the prayer I have, with great regularity, told myself I made. I am aware you will have the original on file."
+
+"I do," said Vishnu.
+
+"Then, sir, with your permission, I should like to put it on the record in my own voice, for the first time in fifty years."
+
+"Please."
+[max]
+“Sir, the words I have given the Palasagar Trust, and the words I have given myself, these fifty years, are not the words I actually said. The words I have given are: *please, make use of my efforts, my position, and my skills, to sustain the children of Palasagar, for the sake of Sir Reginald’s memory.* A decent prayer. A creditable prayer. That is the prayer I have, with great regularity, told myself I made.”
+
+“It is not,” said Krishna.
+
+“I know, sir.” Pemberton met the eyes of Krishna, though his vision was trapped in memory. “With your permission, sir, I should like to put it on the record in my own voice, for the first time in fifty years.”
+
+“Please.”
+[notes]
+
+===
+[claude]
+Pemberton set down the cup. He looked at the tray. He said, "I had been drinking. I had found the master perhaps two hours earlier. I had not rung the doctor. I had not rung anyone. I had sat with the body, sir, and at some point I had gone to the floor — the study floor; the rug is still there, and the stain is still on it; it is not blood, I should say; it is ink, from the bottle he had knocked off the desk when he went down. I tried to clean it once. I did not try twice. It is the same iron-gall I have refilled since, five times, and it has oxidised on the rug as it oxidises on the page. For several years it looked to me very like a map. I had drunk perhaps half the whisky from the decanter. I was not grieving, sir. I was angry. I was angry at the solicitor in London, and at the cousin in Durban, and at the annuity, and at the master for the inconvenience of having died, and at myself for not having loved him well enough while he was alive to receive it. And I said, aloud, to the ceiling —"
+[max]
+Pemberton tried to clear his throat, and began again, but his words were rougher as he went on. “I had been drinking. I had found the master perhaps an hour earlier. I had not rung the doctor. I had not rung anyone yet. It was just me. I sat with the body, sir, at first. At some point I had gone to the floor—the study floor. I moved the rug up to the attic. The stain is still on it. It is not blood, I should say; it is ink, from the bottle he had knocked off the desk when he went down. I tried to clean it multiple times, but that iron-gall somehow burned itself onto the cloth. For several years it looked to me very like a map. I had drunk most of the whisky from the decanter. It wasn’t like Sir Reginald needed it. I was not grieving, sir. I was angry. I was angry at the late Sir Christopher, and at the cousin in Durban, and at the annuity, and at the master for the inconvenience of having died, and at myself for not having loved him well enough while he was alive to receive it. And most of all… And so I said, aloud, staring at the ceiling—”
+[notes]
+
+===
+[claude]
+He stopped. Ms. Chen was not looking at him; she was looking, with a kind of professional courtesy, at the middle distance. Vishnu was looking at him directly.
+
+"*Please. You bastards. Whichever of you is listening — one of you must be listening — please. Just long enough for the fucking village. Then you can have me. You can fucking have me, I don't care.* Those were the words, sir. Those are the words that were answered. I have prayed a tidier version every night since, in the hope that repetition might overwrite the original. It did not. The words were the words."
+[max]
+He stopped. Ms. Cheung was not looking at him; she was looking, with a kind of professional courtesy, at the middle distance. Krishna was looking at him directly.
+
+“*Please. You bastards. If any of you are listening—if any of you are even real—please. Just long enough for the fucking village. Just long enough for the baby of that poor woman. Then you can have me. You can fucking have me. I don’t care.*” A shudder went through him, and he bit back the tears with all his might. “Those were the words, sir. Those are the words that were answered. I have never forgotten. I could not forget. I have prayed a tidier version every night since, in the hope that repetition might overwrite the original. It did not. The words were the words.”
+[notes]
+
+===
+[claude]
+He took a breath. It was the first he had taken in some time.
+
+"I was answered, sir. I did not know I had been answered; I thought I had simply gone on. I thought I had been lucky. The annuity paid. The bank did not query. I signed his name, forged the medical certificates, kept the house. Every month I transferred the annuity into the Trust, and the Trust paid Palasagar, and Palasagar built the roofs, and then the school, and then the clinic, and then —"
+[max]
+He took a slow breath.
+
+“I was answered, sir. I understand that now. I did not know it at the time. I thought I had simply gone on. I thought I had found the strength within myself. I sobered up, and rang an old friend—I will not name him, for his only crime was that of loyalty—whose family happened to run a mortuary, and who happened to live nearby. I thought I had been lucky. I helped the other staff find new work, signing letters of recommendation in Sir Reginald’s name. The annuity paid. His friends did not pry. I kept the house as he would have wanted it. Every year I transferred the annuity into the Palasagar Trust. I did my best to see that it was well-spent. I found a trustworthy man to serve as our liaison, for I could not leave the house for any meaningful amount of time. That money… it built the roofs, and then the school, and then the clinic, and then—”
+[notes]
+
+===
+[claude]
+Here his voice did something it had not done in some decades; it caught, once, and he had to gather it.
+
+"— and then, thirty years in, a small temple, which was not in the codicil, which the village wished for, which the Trust funded because the Trust had funded everything else, and because, I will be plain, sir, I wished it to. There is a generation in Palasagar now that has gone to school. There is a clinic with a doctor. I understand, sir, that the doctor was herself educated on the Trust, and that last year she was responsible for her two hundredth delivery. There is a letter of thanks they write each year, collectively, to a holy man in England who is their friend. The letter comes here, sir, addressed to Sir Reginald. I have them in the drawer, with the pen. In one of them, in 1987 or thereabouts, there was a photograph — a woman in a green sari, standing in front of a roof. I am not certain whether it was the woman with the hut without a roof; whether it was her daughter; whether it was no one I had any reason to know of. I have looked at that photograph many times. I could not think what to say to it. I have never answered a letter. I could not think what I would say."
+[max]
+Pemberton finally seemed to see the figure sitting on the sofa.
+
+“—and then, forty years in, it funded a small temple, which was not part of the plan, but which the village wished for, which I directed the Trust to fund because the Trust had funded everything else, and because—I will be plain, sir—because I wished it to. There is a generation in Palasagar now that has gone to school. There is a clinic with a doctor. I understand, sir, that the doctor was herself educated on the Trust, and that last year she was responsible for her two hundredth delivery. There is a letter of thanks they write each year, collectively, to a holy man in England who is their friend. The letter comes here, sir, addressed to Sir Reginald. In one of them, in nineteen-eighty-seven or thereabouts, there was a photograph—a woman in a green sari, standing in front of a hut. I am not certain whether it was the woman with the hut without a roof, whether it was her daughter, or whether it was no one I had any reason to know of. I have looked at that photograph many times. I could not think what to say to it. I have never answered a letter. I could not think what I would say.”
+[notes]
+
+===
+[claude]
+He set down the teacup. Ms. Chen's pencil was moving across her page. Her face had not changed.
+
+"The annuity," he said, "has nineteen years still to run from today, sir. It was a very long annuity. I have kept Sir Reginald these fifty years — I have kept him, sir. I do not quite know what I have kept. I have kept his signature, his correspondence, his Proof of Life. I have kept the room upstairs in which he is, if you will forgive the word, kept. I have not permitted him to decay. I do not believe I have been permitted to permit him to decay. That, sir, is the account."
+[max]
+He took out a handkerchief and looked at it, before putting it back in his pocket.
+
+“The annuity,” he continued, “still has thirty-eight years to run from today, sir. I have devoted myself to the preservation of Sir Reginald these fifty years—I have kept him, sir. I have kept his house. I have kept his signature, his correspondence, his Proof of Life. I have kept his body. I understand, sir, that you have made it possible. Thank you.”
+[notes]
+
+===
+[claude]
+Vishnu was silent long enough for Pemberton to count three strokes of the mantel clock.
+
+"Mr. Pemberton," he said, "there is a clause in the original prayer that I wish to bring to your attention."
+
+"Sir?"
+
+"You said — in the words that were in fact said — *just long enough for the fucking village, then you can have me.*"
+
+"Yes, sir."
+[max]
+Krishna did not answer. The mantel clock ticked, and ticked, and ticked.
+
+“Mr. Pemberton,” he said, “there is a section in the original prayer that I wish to bring to your attention.”
+
+“Sir?”
+
+“You said—in the words that were in fact said—*just long enough for the fucking village. Just long enough for the baby of that poor woman. Then you can have me.*“
+
+“Yes, sir.”
+[notes]
+
+===
+[claude]
+"The clause has two halves. You have, I think, been attending to the first half for fifty years. You have not noticed that the first half completed itself."
+
+"Sir?"
+[max]
+“The section has two halves. You’ve been attending to the first half for fifty years, and yet you haven’t noticed that it completed itself.”
+
+“Completed, sir?”
+[notes]
+
+===
+[claude]
+"The village, Mr. Pemberton, is sufficient. It has been sufficient for some time. The roofs, the school, the clinic, the temple, the doctor, the two hundredth child. In dharmic terms, the village is established. It does not require the next nineteen years of the annuity to continue being what it is. It would benefit from them; it will not suffer unduly without them. But the village, in the sense you meant it on the night of the prayer — the woman with the roofless hut and her neighbours — the village is safe. It has been safe, by my reckoning, since the monsoon of 2013. You have been maintaining the preservation past the point at which your own condition was satisfied."
+[max]
+“The village, Mr. Pemberton, is sufficient. It has been sufficient for some time. The roofs, the school, the clinic, the temple, the doctor, the two hundredth child. In dharmic terms, the village is established. Their wheel turns from its own energy. It does not require the next thirty-eight years of the annuity to continue along its path. It would benefit from them, yes, but it will not suffer unduly without them. The village, in the sense you meant it on the night of the prayer—the mother with the roofless hut, her neighbours, her children, and her neighbours children—that village is safe. Even during the monsoon last summer, it was safe. You have been maintaining the preservation past the point at which your own condition was satisfied.”
+[notes]
+
+===
+[claude]
+"I — I did not know, sir."
+
+"No. I am aware. I have been waiting. My calendar called me here last year; I waited one season further, for the anniversary, and because I confess to a certain curiosity about the man who had maintained an account for a decade past its own reconciliation."
+[max]
+“I—I did not know, sir.”
+
+“No. I am aware. I have been waiting to see if you would realize it, for it is a gentler thing, to let the world turn according to its own rhythm. My calendar called me here last year. I waited one season further, for the anniversary. For the other auditor.”
+
+Ms. Cheung looked to the deity, but his focus was entirely on the elderly man standing before them with the expression of someone who cannot help but be naked.
+[notes]
+
+===
+[claude]
+"Sir?"
+
+"The second half of the prayer," said Vishnu, "stipulated that I was to take you in his place. I have no wish to take you, Mr. Pemberton. You have served well. But I am empowered to interpret the clause liberally, where the applicant's interest and the ledger's are aligned. I propose the following interpretation: I take, in lieu of you, the paper life of Sir Reginald. He has been, for some time, more paper than man. The paper is what I will correct. And you will remain. Is this acceptable?"
+
+"Sir," said Pemberton, "it is acceptable."
+[max]
+“The second half of the prayer,” Krishna went on, “stipulated that I was to take you—that I was to take your life, in addition to Sir Reginald. Do you understand?”
+
+“Yes, sir.”
+[notes]
+
+===
+[claude]
+"A point of order, while we are clear. The paper life is larger than the papers. It includes the vessel that has made the papers plausible. The house, Mr. Pemberton, has been a party to this preservation for as long as you have — it is the frame in which the paper life was possible, and I am obliged to take the frame also. What I do not take are the letters from Palasagar. I do not take the photograph. I do not take the pen. The affections of a village for a man who did not live to know them are not a debt on the Preserver's ledger; they are a credit on some ledger I do not keep. They stay in the drawer. You will, I expect, wish to write back."
+
+"I expect I shall, sir."
+[max]
+Krishna’s expression darkened by a fraction of a degree, just as a cloud passed in front of the sun. “No. You do not.”
+
+There was a cold silence, marked only by the scratching of Ms. Cheung’s pen in her portfolio. Krishna stood, looking to the other auditor for the first time since her entrance.
+
+She paused, perhaps feeling the eyes upon her, but did not look up. Instead, she went back to writing, and quietly said “It’s against the law for a reason.”
+
+“Very true,” said Krishna with a respectful bow. He turned back to Pemberton, pinning him with a cold gaze. “Over these many years you have served, and served well. You have given life and shelter to those who needed it most. But you have also spun a life made of lies, stolen coins, and the name of a man who you knew less well than you wish to believe. In so doing you have become acid, eating away at the threads—the dharma—of your civilization, in the name of a greater good. Who are you, to decide what is right? Who are you to deny ‘the cousin in Durban,’ whose name you don’t even know, and who you have never talked to directly, the opportunity to spend that money fairly and well?”
+
+Pemberton was silent, eyes downcast.
+
+“It was not your place.” Krishna’s face calmed, and the sun returned. “But it was mine. My hands, guided by my judgment, sustained and guided you. And as a result, it is by my hands that the debt of your crime must be paid.”
+[notes]
+
+===
+[claude]
+"Ms. Chen," said Vishnu. "I recognise that you are here in a professional capacity, and that what I am about to do will be, for you, an unusual event. I would like to offer you the opportunity to step outside. I would also like to offer you the opportunity to remain, if you feel professionally able. Your firm, as I believe I mentioned, has a prior acquaintance with mine. I leave the choice to you."
+
+Ms. Chen considered. "I'll stay," she said. "Thank you."
+
+"Thank you."
+[max]
+Ms. Cheung did look up then, eyebrows furrowed as she tried to guess what the god intended. Any trace of awe was gone. “It is for the courts of England—”
+
+“Yes,” interrupted Krishna with a gesture of two right hands. “But it is also for me. The courts will have their turn, once I have taken mine.” With another gesture and an outstretched hand to help the woman up, he said “I advise you to stand just over there, by the wall. Karma, long overdue, often goes hand-in-hand with death.”
+
+Ms. Cheung stood without assistance, slowly capped her stylograph, and slowly moved to the side. Pemberton felt as though he was paralyzed.
+[notes]
+
+===
+[claude]
+Vishnu set down his teacup. He did not turn to the filing cabinet. He turned to the walls.
+
+He brought his four hands together in a cupped configuration whose purpose was not immediately apparent. The hands began to glow — an even, interior light that cast no shadow and was felt on the skin as warmth. A low note sounded, somewhere between the room and the held breath of a conch. The glow resolved into concentric rings of light, one within another, and without knowing quite why he was counting Pemberton counted to one hundred and eight.
+
+The rings crossed the room in the time it took to blink and passed through the walls on every side.
+[max]
+With everyone in position, Krishna adopted a pose, and a look of great concentration. Pemberton felt a sudden impulse to speak, to act—to do anything to delay this fate—but before he could even open his mouth to object, the god leaped up into the air, hands and feet flashing in sharp motion. Approaching the peak of his flight, he slowed. Or perhaps it was the world that slowed, for Pemberton could only watch, as four dark hands began to, with inhuman speed, trace mandalas that could not be seen with open eyes. All the world was a pale shadow compared to the light that poured into and through him. The sound of the conch reverberated through the bodies of those who were present, and without warning it was there, in his hand. The other attributes had returned, as well: lotus and mace. And the disk—the Sudarshana Chakra, with one-hundred-eight spokes of flame—roared into existence at the tip of Krishna’s outstretched finger, spinning at unimaginable speed as its fire surged into a blue so bright that it made the sky go black. With a full-body spin, Krishna hurled the weapon down, towards Pemberton.
+[notes]
+
+===
+[claude]
+The house fell out of whatever it had been.
+[max]
+It missed.
+
+Or rather, it hit the floor, exactly as Krishna had intended it to, disappearing in an instant.
+[notes]
+
+===
+[claude]
+The kettle in the kitchen came forward forty-seven years in the space of a breath and sat on its ring a ruin of verdigris. The ink on the study rug went wet again and began to dry under a sun fifty summers old; the shape that for several years had looked like a map was now a shape like a stain. In the hall the wallpaper darkened and lifted along its seams. The biscuit tin on top of the fridge, which had contained only buttons for forty-five years, contained only buttons still, but the Queen on its lid had gone the colour of weak tea. The sideboard in the foyer, which had been a sideboard with four recesses waiting for attributes, was a sideboard with a flat inlaid top, and had been for as long as its wood could remember. Every sheet of paper in the filing cabinet bearing Sir Reginald Ashworth-Blake's legal name went to ash in the same instant that, upstairs, a man who had been lying on a bed for half a century entered the decay he had been owed since the twenty-third of May, nineteen seventy-four, and arrived, in the time a ring of light takes to cross a room, at the far end of it. The mole on his neck was gone before the light had finished. The bed was a bed with nothing on it that a bed is not meant to carry.
+[max]
+When the Sudarshana Chakra touched the boiler—a rather large model that had been terribly neglected over the years, thanks to the house’s primary occupant being understandably paranoid about visitors—the pipes agreed in unison that enough was enough, and it was time to explode.
+
+The drawing room shook violently as the explosion caused the wheel of flame to ricochet into the house’s support columns. They, too, had been neglected, and a family of termites had quietly fulfilled their dharma over a decade earlier. As the mansion folded in on itself, the weapon spun, rescinding the grace of Vishnu, piece by piece. The electrical wiring snapped and sparked. The walls gave way. The kettle in the kitchen began to rust. The milk in the fridge began to sour.
+
+It returned to Krishna’s fingertip as blue feet came down at last, to touch the floor. Boards snapped and splintered along fault-lines no human could see. Ms. Cheung clung to an island of safety, pressing back against wallpaper that had begun to fade. Krishna rode the chaos with the grace of a ballerino. Sir Reginald was torn, limb from limb, by threads that refused to snap, even as the house pulled apart.
+[notes]
+
+===
+[claude]
+
+[max]
+And, at the heart of it all, Pemberton was dragged down by the seething floorboards, with a strangled cry that somehow still managed to carry a note of aged dignity, into the underworld.
+[notes]
+
+===
+[claude]
+In the left-hand drawer of the desk in the study, the Conway Stewart rested in its japanned case. The letters from Palasagar lay blue and unmarked in their stack. The photograph sat beneath them as it had sat for thirty-seven years. Nothing in the drawer had moved.
+[max]
+---
+
+In the left-hand drawer of the desk in the study, the Conway Stewart rested in its japanned case. The letters from Palasagar lay unmarked in their stack. The photograph sat in one envelope, just where it had been placed that morning. Nothing in the drawer had come undone, even as the desk had smashed into the concrete basement floor in a fountain of splinters.
+[notes]
+
+===
+[claude]
+The low note stopped. The rings were gone.
+
+"Ms. Chen," said Vishnu, "the account, I believe, is yours."
+[max]
+Krishna set the attributes down, once again, on the sideboard, which had survived the maelstrom almost entirely undamaged, and helped Ms. Cheung climb down into the wreckage.
+
+There was water everywhere, pouring from the shattered pipes and collecting in pools that reflected the azure sky.
+
+Krishna bent down and lifted a beam from where it had fallen atop the body of old Mr. Pemberton. It had nearly flattened the man. But it had landed primarily on a desk. And the desk had sustained the weight.
+
+“Your life is over, I’m afraid,” said the god, turning Pemberton over with two of his arms and lifting him from the pool to rest against the beam. “I took most of it. Ms. Cheung’s courts can have the rest.” He looked towards her.
+[notes]
+
+===
+[claude]
+Ms. Chen opened her portfolio and uncapped her silver pencil. In the box marked *Status of Beneficiary,* she wrote *Deceased.* In the box marked *Date of Death,* she wrote *23 May 1974.* She signed the verifying officer's line and closed the portfolio.
+
+"I'll file it today."
+
+"Thank you, Ms. Chen."
+[max]
+She frowned, quietly taking in the body of the old man, and the shattered home. For a while there was nothing but the sound of water. With a shake of her head, she said to Krishna, “I will file a police report tonight.”
+
+He tilted his head. “Tonight?”
+
+The woman bent beside the man’s body, checking for a pulse. “Tonight,” she confirmed.
+[notes]
+
+===
+[claude]
+
+[max]
+Krishna laughed with the sound of droplets in the open sun. “Then in that grace period, there may yet be time for an afterlife.” He tapped the crown of the old man’s head.
+
+Pemberton opened his eyes and coughed.
+
+“Whoah, there,” said Krishna, almost grinning with delight. “That was quite a fall for a man of your age. Rest for a moment. Collect what parts of yourself remain.”
+
+Pemberton, speechless, wiped water from his hand on his ruined jacket and brushed the dust from his face.
+[notes]
+
+===
+[claude]
+She collected her things and went. Through the library window Pemberton watched her car turn out of the drive.
+
+In the foyer Vishnu was collecting his attributes from the sideboard that was now only a sideboard, one in each hand. He turned, holding the conch and the mace and the disc and the lotus, and looked at Pemberton across the black-and-white tiles, which had begun, very faintly, to show their age.
+
+"Mr. Pemberton."
+
+"Sir."
+
+And Vishnu, four-armed, blue as weather, impeccable in charcoal and indigo, inclined his head in a small and formal bow. Then he straightened, exhaled once, and said, "Right."
+
+He passed through the door, which Pemberton had not opened, and was gone.
+[max]
+Krishna righted himself and took a step away, in the direction of what had been the foyer. He smiled at the two of them, and casually said, as though it had just come to him, “The part worth keeping was never yours to lose.” Then, stepping carefully and collecting his things, he left.
+
+Ms. Cheung looked to the man and frowned. “I’m not like you,” she said, though it sounded more like she was talking to herself. “Don’t take too long. They’ll be after you by tomorrow at the latest.” Then, after a breath, she followed in Krishna’s footsteps, saying nothing more.
+[notes]
+
+===
+[claude]
+
+[max]
+It took Pemberton a long time to find his feet.
+
+His clothes were soaked, and the house was truly in a state. He knew that tomorrow he’d be so bruised and sore that he wondered if he’d be able to leave bed. But as he moved he felt as though he was gaining momentum, spared for the moment from the debts of the body.
+
+Eventually he found a suit that had been spared, and packed it in a relatively undamaged piece of Globe-Trotter luggage that had come down from the attic alongside the stained rug. He looked at that inkstain for a long time, imagining hills and river valleys.
+
+In the drawer he found the letters, which he placed carefully in the bag’s small pocket. He decided to leave the Conway Stewart behind, alongside the doctor’s note. But not before he used it one last time.
+
+“Dear friends…”
+[notes]
+</script>
+
+<script>
+(() => {
+  "use strict";
+
+  /* ---------------- Parse story source ---------------- */
+  const sections = document.getElementById("story-source").textContent
+    .split(/^[ \t]*={3,}[ \t]*$/m)
+    .map(b => b.trim()).filter(Boolean)
+    .map(block => {
+      const sec = { claude: "", max: "", notes: "", label: "" };
+      const re = /^\[(claude|max|notes|label)\][ \t]*$/gim;
+      let m, field = null, start = 0;
+      while ((m = re.exec(block))) {
+        if (field) sec[field] = block.slice(start, m.index).trim();
+        field = m[1].toLowerCase(); start = re.lastIndex;
+      }
+      if (field) sec[field] = block.slice(start).trim();
+      return sec;
+    });
+  const N = sections.length;
+
+  /* ---------------- Tokenizer ---------------- */
+  // Tokens: paragraph breaks, italics markers, whitespace, words, single punctuation.
+  const TOKEN_RE = /(\n[ \t]*\n\s*)|(\\\*)|(\*)|([ \t\n]+)|([\p{L}\p{N}\p{M}'’-]+)|([\s\S])/gu;
+  function tokenize(text) {
+    text = text.replace(/\r\n?/g, "\n").replace(/^[ \t]*-{3,}[ \t]*$/gm, "\u2042").trim();
+    const out = []; let m;
+    TOKEN_RE.lastIndex = 0;
+    while ((m = TOKEN_RE.exec(text))) {
+      if (m[1]) out.push({ k: "para", t: "", key: "¶" });
+      else if (m[2]) out.push({ k: "w", t: "*", key: "*" });
+      else if (m[3]) out.push({ k: "em", t: "", key: "\u0001em" });
+      else if (m[4]) out.push({ k: "ws", t: " ", key: " " });
+      else out.push({ k: "w", t: m[0], key: m[0].replace(/[‘’]/g, "'").replace(/[“”]/g, '"') });
+    }
+    return out;
+  }
+  // For diffing only: ignore spaces around dashes (" — " vs "—").
+  const DASH = /^[—–]$/;
+  const forDiff = toks => toks.filter((t, i) =>
+    !(t.k === "ws" && ((toks[i - 1] && DASH.test(toks[i - 1].t)) || (toks[i + 1] && DASH.test(toks[i + 1].t)))));
+
+  /* ---------------- Word-level diff (LCS) ---------------- */
+  function diffTokens(a, b) {
+    let s = 0;
+    while (s < a.length && s < b.length && a[s].key === b[s].key) s++;
+    let ea = a.length, eb = b.length;
+    while (ea > s && eb > s && a[ea - 1].key === b[eb - 1].key) { ea--; eb--; }
+    const A = a.slice(s, ea), B = b.slice(s, eb), n = A.length, m = B.length, W = m + 1;
+    const ops = [];
+    for (let i = 0; i < s; i++) ops.push({ op: "eq", tok: b[i] });
+    const dp = new Int32Array((n + 1) * (m + 1));
+    for (let i = n - 1; i >= 0; i--)
+      for (let j = m - 1; j >= 0; j--)
+        dp[i * W + j] = A[i].key === B[j].key ? dp[(i + 1) * W + j + 1] + 1
+                      : Math.max(dp[(i + 1) * W + j], dp[i * W + j + 1]);
+    let i = 0, j = 0;
+    while (i < n && j < m) {
+      if (A[i].key === B[j].key) { ops.push({ op: "eq", tok: B[j] }); i++; j++; }
+      else if (dp[(i + 1) * W + j] >= dp[i * W + j + 1]) ops.push({ op: "del", tok: A[i++] });
+      else ops.push({ op: "ins", tok: B[j++] });
+    }
+    while (i < n) ops.push({ op: "del", tok: A[i++] });
+    while (j < m) ops.push({ op: "ins", tok: B[j++] });
+    for (let k = eb; k < b.length; k++) ops.push({ op: "eq", tok: b[k] });
+    return ops;
+  }
+
+  // Group ops into equal / change segments and merge choppy bits so the
+  // diff reads like "~~old phrase~~ new phrase" rather than confetti.
+  function segment(ops) {
+    const segs = [];
+    for (const o of ops) {
+      let last = segs[segs.length - 1];
+      if (o.op === "eq") {
+        if (!last || last.type !== "eq") segs.push(last = { type: "eq", toks: [] });
+        last.toks.push(o.tok);
+      } else {
+        if (!last || last.type !== "chg") segs.push(last = { type: "chg", del: [], ins: [] });
+        (o.op === "del" ? last.del : last.ins).push(o.tok);
+      }
+    }
+    const len = ts => ts.reduce((n, t) => n + (t.k === "ws" ? 1 : t.t.length), 0);
+    const size = g => Math.max(len(g.del), len(g.ins));
+    for (let again = true; again;) {
+      again = false;
+      for (let k = 1; k < segs.length - 1; k++) {
+        const p = segs[k - 1], e = segs[k], q = segs[k + 1];
+        if (e.type !== "eq" || p.type !== "chg" || q.type !== "chg") continue;
+        if (e.toks.some(t => t.k === "para")) continue;
+        const trivial = e.toks.every(t => t.k === "ws" || t.k === "em");
+        const small = len(e.toks) * 2 <= Math.min(size(p), size(q));
+        if (trivial || small) {
+          p.del.push(...e.toks, ...q.del);
+          p.ins.push(...e.toks, ...q.ins);
+          segs.splice(k, 2); again = true; break;
+        }
+      }
+    }
+    for (const g of segs) if (g.type === "chg") {
+      g.pre = []; g.post = [];
+      while (g.del.length && g.ins.length && g.del[0].key === g.ins[0].key) { g.pre.push(g.ins.shift()); g.del.shift(); }
+      while (g.del.length && g.ins.length && g.del.at(-1).key === g.ins.at(-1).key) { g.post.unshift(g.ins.pop()); g.del.pop(); }
+    }
+    return segs;
+  }
+
+  /* ---------------- Rendering ---------------- */
+  const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  // stream: [{op:'eq'|'del'|'ins', tok}] -> HTML paragraphs.
+  // Italics are tracked separately for Claude's text (cI) and Max's text (mI).
+  function renderStream(stream) {
+    let cI = false, mI = false, html = "<p>", runKey = null, buf = "";
+    const flush = () => {
+      if (buf) {
+        const [op, it, fmt] = runKey.split("|");
+        let inner = it === "1" ? `<em>${buf}</em>` : buf;
+        if (fmt === "1") inner = `<span class="fmt" title="Formatting changed">${inner}</span>`;
+        html += op === "del" ? `<del class="d">${inner}</del>` : op === "ins" ? `<ins class="i">${inner}</ins>` : inner;
+      }
+      buf = ""; runKey = null;
+    };
+    for (const { op, tok, soft } of stream) {
+      if (tok.k === "em") { if (op !== "ins") cI = !cI; if (op !== "del") mI = !mI; continue; }
+      if (tok.k === "para") {
+        flush();
+        if (op === "eq" || soft) html += "</p><p>";
+        else if (op === "ins") html += '<ins class="pil" title="New paragraph">¶</ins></p><p>';
+        else html += '<del class="pil" title="Paragraph break removed">¶</del> ';
+        continue;
+      }
+      if (tok.t === "\u2042") { flush(); html += `<span class="scene ${op}" title="Scene break">⁂</span>`; continue; }
+      const it = op === "del" ? cI : mI;
+      const key = `${op}|${it ? 1 : 0}|${op === "eq" && cI !== mI ? 1 : 0}`;
+      if (key !== runKey) { flush(); runKey = key; }
+      buf += esc(tok.t);
+    }
+    flush();
+    return (html + "</p>").replace(/<p>\s*<\/p>/g, "");
+  }
+
+  const isWord = t => t.k === "w" && /[\p{L}\p{N}]/u.test(t.t);
+  const cache = [];
+  function getRender(i) {
+    if (cache[i]) return cache[i];
+    const s = sections[i], a = tokenize(s.claude), b = tokenize(s.max);
+    let stream = [], del = 0, ins = 0, same = 0;
+    const eq = t => { stream.push({ op: "eq", tok: t }); if (isWord(t)) same++; };
+    // A paragraph break inside a larger added/cut chunk is "soft": render it as a
+    // plain break. Only an isolated added/removed break gets a ¶ marker.
+    const push = (op, toks) => {
+      const soft = toks.some(t => isWord(t) || t.t === "\u2042");
+      toks.forEach(t => { stream.push({ op, tok: t, soft }); if (isWord(t)) op === "del" ? del++ : ins++; });
+    };
+    for (const g of segment(diffTokens(forDiff(a), forDiff(b)))) {
+      if (g.type === "eq") { g.toks.forEach(eq); continue; }
+      g.pre.forEach(eq); push("del", g.del); push("ins", g.ins); g.post.forEach(eq);
+    }
+    // Near-total rewrite: show it as one block out, one block in.
+    const total = Math.max(a.filter(isWord).length, b.filter(isWord).length);
+    if (a.length && b.length && total > 12 && same / total < 0.25) {
+      stream = []; del = ins = 0;
+      push("del", a);
+      stream.push({ op: "ins", tok: { k: "para", t: "", key: "" }, soft: true });
+      push("ins", b);
+    }
+    const plain = toks => renderStream(toks.map(t => ({ op: "eq", tok: t })));
+    return (cache[i] = {
+      claude: a.length ? plain(a) : '<p class="empty">Not in Claude’s draft — this passage is new.</p>',
+      max: b.length ? plain(b) : '<p class="empty">Cut from the final version.</p>',
+      edits: renderStream(stream),
+      del, ins,
+    });
+  }
+
+  // Light Markdown for notes (raw HTML passes through).
+  function inline(s) {
+    return s.replace(/`([^`]+)`/g, "<code>$1</code>")
+      .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*([^*\n]+)\*/g, "<em>$1</em>")
+      .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2">$1</a>');
+  }
+  function md(src) {
+    return src.replace(/\r\n?/g, "\n").trim().split(/\n[ \t]*\n/).map(block => {
+      block = block.trim();
+      if (!block) return "";
+      if (/^<[a-z]/i.test(block)) return block;
+      if (/^>/.test(block)) return `<blockquote>${inline(block.replace(/^>\s?/gm, ""))}</blockquote>`;
+      if (/^[-*] /.test(block)) return "<ul>" + block.split(/\n(?=[-*] )/).map(li => `<li>${inline(li.replace(/^[-*] /, ""))}</li>`).join("") + "</ul>";
+      return `<p>${inline(block)}</p>`;
+    }).join("");
+  }
+
+  /* ---------------- State ---------------- */
+  const TABS = [
+    { id: "claude", name: "Claude", cap: "Claude Opus 4.7 · draft" },
+    { id: "edits",  name: "Edits",  cap: "Changes" },
+    { id: "max",    name: "Max",    cap: "Max · published" },
+  ];
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+  };
+  const state = { idx: null, tab: TABS.some(t => t.id === store.get("vh-tab")) ? store.get("vh-tab") : "edits" };
+
+  const ARROW_L = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13 8H3M7 4 3 8l4 4"/></svg>';
+  const ARROW_R = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>';
+  const RESTART = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a5 5 0 1 0 1.5-3.5M3 3v3h3"/></svg>';
+
+  function sectionHTML(i) {
+    const s = sections[i], r = getRender(i);
+    const panelBody = { claude: r.claude, edits: r.edits, max: r.max };
+    const stats = `<span class="stats"><span class="minus">−${r.del}</span>&ensp;<span class="plus">+${r.ins}</span>&ensp;words</span>`;
+    return `
+      <div class="sec-head">
+        <div class="sec-num">Passage <b>${i + 1}</b> of ${N}</div>
+        ${s.label ? `<div class="sec-label">${inline(esc(s.label))}</div>` : ""}
+      </div>
+      <figure class="quote" data-tab="${state.tab}">
+        <div class="tabs" role="tablist" aria-label="Version">
+          ${TABS.map(t => `<button class="tab tab-${t.id}" role="tab" id="tab-${t.id}" aria-controls="panel-${t.id}"
+              aria-selected="${state.tab === t.id}" tabindex="${state.tab === t.id ? 0 : -1}" data-tab="${t.id}">${t.name}</button>`).join("")}
+        </div>
+        <div class="panels">
+          ${TABS.map(t => `<div class="panel panel-${t.id}${state.tab === t.id ? " active" : ""}" role="tabpanel" id="panel-${t.id}" aria-labelledby="tab-${t.id}">
+              <div class="panel-cap"><span>${t.cap}</span>${t.id === "edits" ? stats : ""}</div>
+              <div class="txt">${panelBody[t.id]}</div>
+            </div>`).join("")}
+        </div>
+      </figure>
+      ${s.notes.trim() ? `<section class="notes"><div class="notes-label">Notes</div>${md(s.notes)}</section>` : ""}
+      <nav class="pager" aria-label="Passage navigation">
+        <button class="pill" data-go="${i === 0 ? "intro" : i - 1}">${ARROW_L}<span class="label">${i === 0 ? "Introduction" : "Previous"}</span></button>
+        <span class="pos">${i + 1} / ${N}</span>
+        ${i < N - 1
+          ? `<button class="pill" data-go="${i + 1}"><span class="label">Next</span>${ARROW_R}</button>`
+          : `<button class="pill" data-go="intro"><span class="label">Back to start</span>${RESTART}</button>`}
+      </nav>`;
+  }
+
+  const view = document.getElementById("view");
+  if (N > 40) document.documentElement.style.setProperty("--seg-gap", "1px");
+  const progress = document.getElementById("progress");
+  progress.innerHTML = sections.map((s, i) =>
+    `<button data-go="${i}" aria-label="Go to passage ${i + 1}" title="${i + 1}${s.label ? " · " + esc(s.label) : ""}"></button>`).join("");
+
+  function render(prev) {
+    const i = state.idx;
+    if (i < 0) {
+      view.replaceChildren(document.getElementById("intro-tpl").content.cloneNode(true));
+      view.querySelectorAll("[data-count]").forEach(el => el.textContent = N);
+      document.title = "Vishnu Hadouken";
+    } else {
+      view.innerHTML = sectionHTML(i);
+      document.title = `${i + 1}/${N} · Vishnu Hadouken`;
+    }
+    [...progress.children].forEach((b, k) => {
+      b.classList.toggle("done", k < i);
+      b.classList.toggle("cur", k === i);
+      if (k === i) b.setAttribute("aria-current", "step"); else b.removeAttribute("aria-current");
+    });
+    if (prev !== null) {
+      view.classList.remove("enter-r", "enter-l");
+      void view.offsetWidth;
+      view.classList.add(i > prev ? "enter-r" : "enter-l");
+      window.scrollTo(0, 0);
+    }
+  }
+
+  function setTab(id) {
+    state.tab = id; store.set("vh-tab", id);
+    const fig = view.querySelector(".quote");
+    if (!fig) return;
+    fig.dataset.tab = id;
+    fig.querySelectorAll(".tab").forEach(t => {
+      const on = t.dataset.tab === id;
+      t.setAttribute("aria-selected", on); t.tabIndex = on ? 0 : -1;
+    });
+    fig.querySelectorAll(".panel").forEach(p => p.classList.toggle("active", p.id === "panel-" + id));
+  }
+
+  /* ---------------- Routing (#intro, #1 … #N) ---------------- */
+  function idxFromHash() {
+    const m = location.hash.match(/^#(\d+)$/);
+    const n = m ? +m[1] : 0;
+    return n >= 1 && n <= N ? n - 1 : -1;
+  }
+  function go(idx) { location.hash = idx < 0 ? "intro" : String(idx + 1); }
+  function sync() {
+    const idx = idxFromHash();
+    if (idx === state.idx) return;
+    const prev = state.idx; state.idx = idx; render(prev);
+  }
+  window.addEventListener("hashchange", sync);
+  const next = () => { if (state.idx < N - 1) go(state.idx + 1); };
+  const prev = () => { if (state.idx >= 0) go(state.idx - 1); };
+
+  document.addEventListener("click", e => {
+    const tab = e.target.closest(".tab[data-tab]");
+    if (tab) { setTab(tab.dataset.tab); return; }
+    const nav = e.target.closest("[data-go]");
+    if (nav) { e.preventDefault(); go(nav.dataset.go === "intro" ? -1 : +nav.dataset.go); }
+  });
+  document.addEventListener("keydown", e => {
+    if (e.metaKey || e.ctrlKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+    if (e.key === "ArrowRight") { e.preventDefault(); next(); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); prev(); }
+    else if (state.idx >= 0) {
+      const t = { 1: "claude", 2: "edits", 3: "max", c: "claude", e: "edits", m: "max" }[e.key.toLowerCase()];
+      if (t) setTab(t);
+    }
+  });
+  // Swipe left/right on touch screens
+  let tx = null, ty = null;
+  view.addEventListener("touchstart", e => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+  view.addEventListener("touchend", e => {
+    if (tx === null || String(getSelection())) { tx = null; return; }
+    const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty; tx = null;
+    if (Math.abs(dx) > 70 && Math.abs(dx) > 2 * Math.abs(dy)) dx < 0 ? next() : prev();
+  }, { passive: true });
+
+  sync();
+})();
+</script>
+</body>
+</html>
